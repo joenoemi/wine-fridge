@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#6f1236" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Cellar Notes" />
+  <title>Cellar Notes | Personal Wine Fridge</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <section id="authScreen" class="auth-shell">
+    <div class="auth-card">
+      <div class="brand-mark">🍇</div>
+      <p class="eyebrow">PERSONAL WINE FRIDGE</p>
+      <h1>Cellar Notes</h1>
+      <p class="muted">Track every bottle, scan UPCs, rate what you drink, and know what to buy next.</p>
+      <form id="loginForm" class="stack">
+        <label>Email address<input id="emailInput" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
+        <button class="primary" type="submit">Email me a sign-in link</button>
+      </form>
+      <p class="fineprint">No password required. Supabase sends a secure magic link.</p>
+      <div id="configWarning" class="warning hidden">Update <strong>config.js</strong> with your Supabase URL and publishable key first.</div>
+    </div>
+  </section>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <button class="brand" data-view="home"><span>🍇</span><span><b>Cellar Notes</b><small>Personal wine fridge</small></span></button>
+      <div class="header-actions"><button id="scanTop" class="icon-btn" title="Scan a bottle">▣</button><button id="signOutBtn" class="text-btn">Sign out</button></div>
+    </header>
+
+    <main>
+      <section id="homeView" class="view active">
+        <div class="hero">
+          <p>YOUR CELLAR AT A GLANCE</p><h1>Welcome back</h1>
+          <div class="stats">
+            <div><strong id="statBottles">0</strong><span>Bottles</span></div>
+            <div><strong id="statWines">0</strong><span>Wines</span></div>
+            <div><strong id="statValue">$0</strong><span>Est. value</span></div>
+          </div>
+        </div>
+        <div class="quick-grid">
+          <button id="scanHome" class="quick-card"><span class="quick-icon">▣</span><b>Scan a bottle</b><small>Identify and add a UPC</small></button>
+          <button data-view="shopping" class="quick-card"><span class="quick-icon">🛍</span><b>Restock list</b><small id="lowCount">Nothing is low</small></button>
+        </div>
+        <div class="section-head"><div><p class="eyebrow">DRINK SOON</p><h2>Low-stock favorites</h2></div><button data-view="shopping" class="link-btn">See all</button></div>
+        <div id="homeLowList" class="card-list"></div>
+        <div class="section-head"><div><p class="eyebrow">RECENT</p><h2>Latest activity</h2></div></div>
+        <div id="activityList" class="activity-list"></div>
+      </section>
+
+      <section id="cellarView" class="view">
+        <p class="eyebrow">MY COLLECTION</p><h1>Wine cellar</h1>
+        <div class="search-row"><input id="searchInput" type="search" placeholder="Search wine, producer, region..." /><select id="typeFilter"><option>All</option><option>Red</option><option>White</option><option>Rosé</option><option>Sparkling</option><option>Dessert</option><option>Other</option></select></div>
+        <div id="wineList" class="card-list"></div>
+        <div id="emptyCellar" class="empty hidden"><span>🍷</span><h3>Your fridge is empty</h3><p>Scan a UPC or add a wine manually.</p><button class="primary" id="emptyAdd">Add first wine</button></div>
+      </section>
+
+      <section id="shoppingView" class="view">
+        <p class="eyebrow">SMART RESTOCK</p><h1>Shopping list</h1><p class="muted">Favorites appear here whenever current quantity is below your target.</p>
+        <div id="shoppingList" class="card-list"></div>
+        <button id="copyShopping" class="secondary wide">Copy shopping list</button>
+      </section>
+
+      <section id="discoverView" class="view">
+        <p class="eyebrow">TASTE MATCH</p><h1>For you</h1><p class="muted">Recommendations are generated from the flavor profiles and styles you rate highest.</p>
+        <div id="recommendations" class="card-list"></div>
+      </section>
+
+      <section id="settingsView" class="view">
+        <p class="eyebrow">PREFERENCES</p><h1>Settings</h1>
+        <form id="settingsForm" class="form-card">
+          <label>Display name<input id="displayName" maxlength="80" placeholder="Jose" /></label>
+          <label>Favorite retailer<input id="favoriteRetailer" maxlength="120" placeholder="Total Wine, local shop, etc." /></label>
+          <label>Recommendation price ceiling<input id="priceCeiling" type="number" min="0" step="1" value="75" /></label>
+          <button class="primary" type="submit">Save settings</button>
+        </form>
+        <div class="form-card"><h3>Data and sources</h3><p class="muted">UPC details are looked up through Open Food Facts when available. Imported information may be incomplete, so every field remains editable. Your personal ratings drive recommendations.</p></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button data-view="home" class="active"><span>⌂</span>Home</button><button data-view="cellar"><span>🍷</span>Cellar</button><button id="scanNav" class="scan-nav"><span>▣</span>Scan</button><button data-view="shopping"><span>🛍</span>Buy</button><button data-view="discover"><span>✦</span>For You</button>
+    </nav>
+  </div>
+
+  <dialog id="wineDialog" class="sheet">
+    <form id="wineForm" method="dialog">
+      <div class="sheet-head"><div><p class="eyebrow" id="formEyebrow">ADD BOTTLE</p><h2 id="formTitle">Wine details</h2></div><button type="button" class="close-btn" data-close="wineDialog">×</button></div>
+      <input id="wineId" type="hidden" /><input id="imageUrl" type="hidden" />
+      <div class="form-grid">
+        <label class="span-2">Wine name<input id="wineName" required maxlength="160" /></label>
+        <label class="span-2">Producer<input id="producer" maxlength="160" /></label>
+        <label>Vintage<input id="vintage" inputmode="numeric" maxlength="4" placeholder="2022 or NV" /></label>
+        <label>Type<select id="wineType"><option>Red</option><option>White</option><option>Rosé</option><option>Sparkling</option><option>Dessert</option><option>Other</option></select></label>
+        <label class="span-2">Varietal / blend<input id="varietal" maxlength="120" /></label>
+        <label>Country<input id="country" maxlength="100" /></label><label>Region<input id="region" maxlength="120" /></label>
+        <label>UPC<input id="upc" maxlength="20" inputmode="numeric" /></label><label>Rack / slot<input id="rack" maxlength="40" placeholder="A-03" /></label>
+        <label>Quantity<input id="quantity" type="number" min="0" value="1" required /></label><label>Target quantity<input id="targetQuantity" type="number" min="0" value="2" required /></label>
+        <label>Purchase price<input id="purchasePrice" type="number" min="0" step="0.01" /></label><label>Approx. price<input id="estimatedPrice" type="number" min="0" step="0.01" /></label>
+        <label class="span-2">External source name<input id="externalSource" maxlength="120" placeholder="Open Food Facts or manually entered source" /></label>
+        <label>External rating<input id="externalRating" type="number" min="0" max="100" step="0.1" /></label><label>Personal rating<select id="personalRating"><option value="0">Not rated</option><option value="1">1 - Not for me</option><option value="2">2 - Fair</option><option value="3">3 - Good</option><option value="4">4 - Very good</option><option value="5">5 - Favorite</option></select></label>
+        <label>Body (1–5)<input id="bodyScore" type="range" min="1" max="5" value="3" /></label><label>Sweetness (1–5)<input id="sweetnessScore" type="range" min="1" max="5" value="2" /></label>
+        <label>Acidity (1–5)<input id="acidityScore" type="range" min="1" max="5" value="3" /></label><label>Tannin (1–5)<input id="tanninScore" type="range" min="1" max="5" value="3" /></label>
+        <label class="span-2">Flavor tags<input id="flavorTags" maxlength="300" placeholder="blackberry, vanilla, cedar" /></label>
+        <label class="span-2">Your tasting notes<textarea id="personalNotes" rows="3" maxlength="1500"></textarea></label>
+      </div>
+      <div class="form-actions"><button type="button" id="deleteWine" class="danger hidden">Delete</button><button type="button" class="secondary" data-close="wineDialog">Cancel</button><button type="submit" class="primary">Save wine</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="scanDialog" class="sheet scan-sheet">
+    <div class="sheet-head"><div><p class="eyebrow">ADD BOTTLE</p><h2>Scan UPC</h2></div><button type="button" class="close-btn" data-close="scanDialog">×</button></div>
+    <div id="reader"></div>
+    <p id="scanStatus" class="muted center">Choose the iPhone rear camera and place the UPC inside the frame.</p>
+    <div class="manual-row"><input id="manualUpc" inputmode="numeric" placeholder="Enter UPC manually" /><button id="lookupUpc" class="secondary">Look up</button></div>
+    <button id="manualAdd" class="link-btn wide">Wine not found? Add it manually</button>
+  </dialog>
+
+  <dialog id="detailDialog" class="sheet">
+    <div id="detailContent"></div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
