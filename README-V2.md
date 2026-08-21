@@ -1,6 +1,6 @@
 # Cellar Notes V2 Upgrade
 
-V2 replaces magic-link sign-in with email/password login, creates a secure shared household cellar, replaces QR-oriented scanning with ZXing UPC/EAN scanning, checks your own cellar before public databases, checks both Open Food Facts and Open Products Facts, and adds on-device label OCR as a manual-entry assistant.
+V2 lastes replaces magic-link sign-in with email/password login, creates a secure shared household cellar, replaces QR-oriented scanning with ZXing UPC/EAN scanning, checks your own cellar before public databases, checks both Open Food Facts and Open Products Facts, and adds on-device label OCR as a manual-entry assistant.
 
 ## Important limitations
 
