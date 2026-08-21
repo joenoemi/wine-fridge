@@ -1,10 +1,10 @@
 {
-  "name": "Cellar Notes Personal Wine Fridge",
+  "name": "Cellar Notes V2",
   "short_name": "Cellar Notes",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#faf7f2",
-  "theme_color": "#75163b",
+  "theme_color": "#74163b",
   "icons": [
     {
       "src": "icon.svg",
