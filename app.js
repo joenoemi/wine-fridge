@@ -19,7 +19,10 @@ async function boot(){
 }
 function showAuth(){ $('#authScreen').classList.remove('hidden');$('#app').classList.add('hidden') }
 async function enterApp(u){user=u;$('#authScreen').classList.add('hidden');$('#app').classList.remove('hidden');await loadAll();showView('home')}
-$('#loginForm').onsubmit=async e=>{e.preventDefault();if(!db)return toast('Configure Supabase first');const email=$('#emailInput').value.trim();const {error}=await db.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});if(error)toast(error.message);else toast('Check your email for the sign-in link')};
+$('#loginForm').onsubmit=async e=>{e.preventDefault();if(!db)return toast('Configure Supabase first');const email=$('#emailInput').value.trim();const {error}=await db.auth.signInWithPassword({
+  email,
+  password
+});if(error)toast(error.message);else toast('Check your email for the sign-in link')};
 $('#signOutBtn').onclick=()=>db.auth.signOut();
 
 async function loadAll(){
