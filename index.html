@@ -25,10 +25,34 @@
       <h1>Cellar Notes</h1>
       <p class="muted">Track every bottle, scan UPCs, rate what you drink, and know what to buy next.</p>
       <form id="loginForm" class="stack">
-        <label>Email address<input id="emailInput" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
-        <button class="primary" type="submit">Email me a sign-in link</button>
-      </form>
-      <p class="fineprint">No password required. Supabase sends a secure magic link.</p>
+  <label>
+    Email address
+    <input
+      id="emailInput"
+      type="email"
+      autocomplete="email"
+      required
+    />
+  </label>
+
+  <label>
+    Password
+    <input
+      id="passwordInput"
+      type="password"
+      autocomplete="current-password"
+      required
+    />
+  </label>
+
+  <button class="primary" type="submit">
+    Sign In
+  </button>
+</form>
+
+<p class="fineprint">
+  Sign in using your email and password.
+</p>
       <div id="configWarning" class="warning hidden">Update <strong>config.js</strong> with your Supabase URL and publishable key first.</div>
     </div>
   </section>
